@@ -1,39 +1,48 @@
-# OS / editor
+# --- OS noise ---
 .DS_Store
 Thumbs.db
 
-# Secrets
+# --- Secrets ---
 .env
 .env.*
+.Secrets
 *.key
 *.pem
 
-# Node / JS
-node_modules/
+# --- Dependencies ---
+**/node_modules/
+
+# --- Logs ---
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Builds / artifacts (important: prevents GitHub >100MB issues)
+# --- Build / artifacts ---
 dist/
 out/
 build/
 .release/
-releases/
+.releases/
 *.zip
 *.7z
 *.dmg
 *.exe
 
-# Electron pack outputs (common)
+# --- Next.js / Vercel ---
+.next/
+.vercel/
+
+# --- Electron pack outputs (common) ---
 **/win-unpacked/
 **/mac-unpacked/
 **/*.blockmap
 
-# Next.js / Vercel
-.next/
-.vercel/
+# --- FXS outputs / temp ---
+**/fxs-output/
+**/*.fxs
+**/unpack_test*/
 
-# Logs
-logs/
-*.log
+# --- Repo-root-only lock (we do NOT want a root lockfile) ---
+/package-lock.json
