@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>The Global File Exchange · SmartFile Vault</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="viewer.css" />
+  </head>
+  <body>
+    <div class="gfe-app">
+      <!-- HEADER / BRAND -->
+      <header class="gfe-header">
+        <div class="gfe-brand">
+          <img
+            src="gfe-coin.png"
+            alt="Global File Exchange"
+            class="gfe-coin"
+          />
+          <div class="gfe-brand-text">
+            <h1 id="vault-title">The Global File Exchange</h1>
+            <p class="gfe-tagline">Authenticated FXS SmartFile</p>
+          </div>
+        </div>
+
+        <div class="gfe-file-pill">
+          <img
+            src="file-icon.png"
+            alt="FXS SmartFile icon"
+            class="gfe-file-icon"
+          />
+          <span class="gfe-file-ext">.FXS</span>
+        </div>
+      </header>
+
+      <!-- MAIN VAULT BODY -->
+      <main class="gfe-main">
+        <!-- LEFT: PRIMARY ASSET -->
+        <section class="gfe-left">
+          <h2 class="gfe-section-title">Primary asset</h2>
+          <p class="gfe-subtitle" id="asset-subtitle">
+            This SmartFile can hold a video, image, audio, or document. The
+            primary asset is the star — the certificate, receipt, film, or
+            artwork you minted into this file.
+          </p>
+
+          <div id="media-frame" class="gfe-media-frame">
+            <p class="gfe-media-placeholder">
+              Media wiring comes next in our build. For now, this is the live
+              vault shell preview.
+            </p>
+          </div>
+        </section>
+
+        <!-- RIGHT: OWNERSHIP PANEL -->
+        <section class="gfe-right">
+          <h2 class="gfe-section-title">Ownership</h2>
+          <dl class="gfe-meta-list">
+            <div>
+              <dt>Title</dt>
+              <dd id="meta-title">Loading…</dd>
+            </div>
+            <div>
+              <dt>Owner</dt>
+              <dd id="meta-owner">Loading…</dd>
+            </div>
+            <div>
+              <dt>Credential ID</dt>
+              <dd id="meta-cred-id">Loading…</dd>
+            </div>
+            <div>
+              <dt>Issued</dt>
+              <dd id="meta-issued">Loading…</dd>
+            </div>
+            <div>
+              <dt>Network</dt>
+              <dd id="meta-network">Offline</dd>
+            </div>
+          </dl>
+
+          <button id="toggle-cert" class="gfe-button">
+            View ownership certificate
+          </button>
+
+          <div id="cert-panel" class="gfe-cert-panel gfe-hidden">
+            <img
+              src="certificate.png"
+              alt="Ownership certificate"
+              class="gfe-cert-image"
+            />
+          </div>
+        </section>
+      </main>
+
+      <!-- ADVANCED / JSON -->
+      <section class="gfe-advanced">
+        <details>
+          <summary>Advanced details (JSON)</summary>
+          <pre id="json-debug">{ }</pre>
+        </details>
+      </section>
+
+      <!-- FOOTER -->
+      <footer class="gfe-footer">
+        <p class="gfe-footer-main">
+          The New World Vault · Where Ownership Begins Again
+        </p>
+        <p class="gfe-footer-note">
+          This SmartFile is a signed container created by Global Data Capture
+          LLC for the Global File Exchange platform.
+        </p>
+      </footer>
+    </div>
+
+    <script src="viewer.js"></script>
+  </body>
+</html>

@@ -1,0 +1,237 @@
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background: #050506;
+  color: #f5f5f5;
+}
+
+.gfe-app {
+  max-width: 1100px;
+  margin: 20px auto 40px;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* Header / brand */
+
+.gfe-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.gfe-brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.gfe-coin {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: block;
+}
+
+.gfe-brand-text h1 {
+  margin: 0;
+  font-size: 24px;
+  letter-spacing: 0.06em;
+}
+
+.gfe-tagline {
+  margin: 4px 0 0;
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+/* File pill */
+
+.gfe-file-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #111015;
+  border: 1px solid #35333d;
+}
+
+.gfe-file-icon {
+  width: 34px;
+  height: 40px;
+  display: block;
+}
+
+.gfe-file-ext {
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #f3c461;
+}
+
+/* Main layout */
+
+.gfe-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 32px;
+  margin-bottom: 24px;
+}
+
+.gfe-section-title {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+.gfe-subtitle {
+  margin: 0 0 14px;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+/* Media frame */
+
+.gfe-media-frame {
+  border-radius: 16px;
+  border: 1px solid #34323c;
+  background: radial-gradient(circle at top, #2b2112 0, #050506 55%);
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.gfe-media-placeholder {
+  text-align: center;
+  font-size: 14px;
+  max-width: 360px;
+  opacity: 0.9;
+}
+
+/* Ownership panel */
+
+.gfe-right {
+  border-radius: 16px;
+  border: 1px solid #34323c;
+  background: #08070c;
+  padding: 16px 18px 20px;
+}
+
+.gfe-meta-list {
+  margin: 10px 0 18px;
+  padding: 0;
+}
+
+.gfe-meta-list div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.gfe-meta-list dt {
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+.gfe-meta-list dd {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Certificate panel */
+
+.gfe-button {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #f3c461;
+  background: transparent;
+  color: #f3c461;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.gfe-button:hover {
+  background: rgba(243, 196, 97, 0.12);
+}
+
+.gfe-cert-panel {
+  margin-top: 14px;
+}
+
+.gfe-cert-image {
+  width: 100%;
+  border-radius: 12px;
+  display: block;
+}
+
+/* Advanced / JSON */
+
+.gfe-advanced {
+  margin-bottom: 16px;
+}
+
+.gfe-advanced summary {
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.gfe-advanced pre {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: #050509;
+  border-radius: 10px;
+  font-size: 11px;
+  max-height: 260px;
+  overflow: auto;
+}
+
+/* Footer */
+
+.gfe-footer {
+  font-size: 12px;
+  opacity: 0.8;
+  border-top: 1px solid #232129;
+  padding-top: 10px;
+}
+
+.gfe-footer-main {
+  margin: 0 0 2px;
+}
+
+.gfe-footer-note {
+  margin: 0;
+}
+
+/* Utility */
+
+.gfe-hidden {
+  display: none;
+}
+
+/* Responsive */
+
+@media (max-width: 800px) {
+  .gfe-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .gfe-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .gfe-app {
+    padding: 16px;
+  }
+}

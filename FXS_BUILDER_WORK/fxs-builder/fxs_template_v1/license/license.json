@@ -1,0 +1,54 @@
+{
+  "license_version": "1.0.0",
+  "license_id": "LIC-REPLACE",
+  "title": "REPLACE_WITH_LICENSE_TITLE",
+  "summary": "REPLACE_WITH_LICENSE_SUMMARY",
+  "jurisdiction": "REPLACE_WITH_JURISDICTION",
+  "governing_law": "REPLACE_WITH_GOVERNING_LAW",
+  "effective_date": "REPLACE_WITH_DATE",
+  "expires_on": null,
+  "parties": {
+    "licensor": {
+      "name": "REPLACE_LICENSOR_NAME",
+      "role": "Licensor",
+      "wallet_address": "0xREPLACE_LICENSOR_WALLET"
+    },
+    "licensee": {
+      "name": "REPLACE_LICENSEE_NAME",
+      "role": "Licensee",
+      "wallet_address": "0xREPLACE_LICENSEE_WALLET"
+    }
+  },
+  "usage_rights": {
+    "personal_use": true,
+    "commercial_use": false,
+    "broadcast_use": false,
+    "public_display": true,
+    "derivative_works": false,
+    "resale_allowed": false,
+    "transfer_allowed": false,
+    "sublicense_allowed": false
+  },
+  "access_rights": {
+    "dashboard_access": true,
+    "holder_portal_access": true,
+    "special_features": []
+  },
+  "royalties": {
+    "applies": false,
+    "percentage": 0,
+    "payable_to_wallet": null,
+    "notes": ""
+  },
+  "restrictions": [
+    "REPLACE_WITH_RESTRICTION_1"
+  ],
+  "termination": {
+    "can_terminate": true,
+    "termination_conditions": [
+      "REPLACE_WITH_TERMINATION_CONDITION_1"
+    ]
+  },
+  "full_text_url": "https://theglobaltokenexchange.com/licenses/REPLACE",
+  "notes": "This JSON is a structured summary; if there is any conflict, the full license text at the URL above controls."
+}

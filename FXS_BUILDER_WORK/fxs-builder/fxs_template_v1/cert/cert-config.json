@@ -1,0 +1,27 @@
+{
+  "canvas": {
+    "width": 1024,
+    "height": 1536
+  },
+  "zones": {
+    "tokenImage": {
+      "x": 262,
+      "y": 420,
+      "width": 500,
+      "height": 500
+    },
+    "issuedDate": {
+      "x": 160,
+      "y": 1080,
+      "maxWidth": 720,
+      "fontSize": 32
+    },
+    "credentialId": {
+      "x": 160,
+      "y": 1130,
+      "maxWidth": 720,
+      "fontSize": 32
+    }
+  }
+}
+

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FXS Smart File Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1a2540 0, #050711 55%, #020308 100%);
+      color: #f6f6f6;
+    }
+    .page {
+      max-width: 1200px;
+      margin: 24px auto 40px;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #ff8d8d;
+      margin-bottom: 20px;
+    }
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ff3b3b;
+    }
+    .card {
+      background: radial-gradient(circle at top left, #202946 0, #050814 60%);
+      border-radius: 18px;
+      border: 1px solid #262c45;
+      padding: 22px 24px 26px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.75);
+    }
+    .asset-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px 24px;
+      margin-bottom: 24px;
+      font-size: 13px;
+    }
+    .meta-label {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 11px;
+      color: #9ea5c9;
+      margin-bottom: 2px;
+    }
+    .meta-value {
+      font-weight: 500;
+      color: #f5f5ff;
+    }
+    .section-title {
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 11px;
+      color: #9ea5c9;
+      margin-bottom: 10px;
+      margin-top: 4px;
+    }
+    .player-frame {
+      border-radius: 16px;
+      border: 1px solid #2c3555;
+      padding: 12px;
+      background: radial-gradient(circle at top, #1e2644 0, #050713 80%);
+      margin-bottom: 16px;
+    }
+    .player-label {
+      font-size: 12px;
+      color: #b2badc;
+      margin-bottom: 8px;
+    }
+    .player-inner {
+      border-radius: 14px;
+      overflow: hidden;
+      background: #000;
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      max-height: 520px;
+      object-fit: contain;
+      display: block;
+    }
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .btn {
+      border-radius: 999px;
+      border: 1px solid #384062;
+      background: rgba(8, 13, 32, 0.9);
+      padding: 7px 14px;
+      font-size: 12px;
+      color: #c7cff9;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn-primary {
+      border-color: #ffd26f;
+      background: linear-gradient(90deg, #ffb347, #ffd26f);
+      color: #130c05;
+      font-weight: 600;
+    }
+    .btn[disabled] {
+      opacity: 0.55;
+      cursor: default;
+    }
+    .footer-strip {
+      margin-top: 8px;
+      padding-top: 10px;
+      border-top: 1px solid #262c45;
+      font-size: 11px;
+      color: #8f96b8;
+    }
+    @media (max-width: 768px) {
+      .page {
+        padding: 18px 14px 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="status">
+      <div class="status-dot"></div>
+      <div id="status-text">Offline or dashboard unavailable.</div>
+    </div>
+
+    <div class="card">
+      <!-- META ROW -->
+      <div class="asset-meta">
+        <div>
+          <div class="meta-label">Asset Title</div>
+          <div class="meta-value" id="asset-title">
+            The Global Token Exchange – Platform Token (Demo Video)
+          </div>
+        </div>
+        <div>
+          <div class="meta-label">Token ID</div>
+          <div class="meta-value" id="token-id">gte-platform-0001</div>
+        </div>
+        <div>
+          <div class="meta-label">Chain</div>
+          <div class="meta-value" id="chain-name">Polygon</div>
+        </div>
+        <div>
+          <div class="meta-label">Owner Wallet</div>
+          <div class="meta-value" id="owner-wallet">0xYOURWALLET</div>
+        </div>
+      </div>
+
+      <!-- PLAYER -->
+      <div class="section-title">Player</div>
+      <div class="player-frame">
+        <div class="player-label">Local / bundled video</div>
+        <div class="player-inner">
+          <!-- For now we just play asset.mov in the bundle -->
+          <video controls src="./asset.mov">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </div>
+
+      <!-- BUTTONS -->
+      <div class="button-row">
+        <a class="btn" href="#" id="btn-open-dashboard">Open Dashboard</a>
+        <a class="btn" href="#" id="btn-view-onchain">View On-Chain Record</a>
+        <button class="btn" id="btn-manage-wallets" disabled>Manage Wallets</button>
+      </div>
+
+      <div class="footer-strip">
+        FXS Smart File v1 — Local, portable smart file format. When opened online, this file pings your dashboard
+        endpoint to verify connection and usage.
+      </div>
+    </div>
+  </div>
+</body>
+</html>

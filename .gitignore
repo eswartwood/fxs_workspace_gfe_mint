@@ -1,0 +1,39 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
+.env.*
+*.key
+*.pem
+
+# Node / JS
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Builds / artifacts (important: prevents GitHub >100MB issues)
+dist/
+out/
+build/
+.release/
+releases/
+*.zip
+*.7z
+*.dmg
+*.exe
+
+# Electron pack outputs (common)
+**/win-unpacked/
+**/mac-unpacked/
+**/*.blockmap
+
+# Next.js / Vercel
+.next/
+.vercel/
+
+# Logs
+logs/
+*.log

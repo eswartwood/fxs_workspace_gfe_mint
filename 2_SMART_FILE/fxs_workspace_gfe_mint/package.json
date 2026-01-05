@@ -1,0 +1,31 @@
+{
+  "name": "fxs_workspace_gfe_mint",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "clean": "rimraf .next dist out src/builder/generated",
+    "predev": "npm run clean",
+    "dev": "next dev --turbo",
+    "build": "npm run clean && next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "ffmpeg-static": "^5.3.0",
+    "jszip": "^3.10.1",
+    "next": "16.0.8",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/node": "^20.11.30",
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "autoprefixer": "^10.4.23",
+    "postcss": "^8.5.6",
+    "rimraf": "^6.0.1",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^5.4.5"
+  }
+}

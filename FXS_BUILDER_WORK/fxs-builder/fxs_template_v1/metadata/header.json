@@ -1,0 +1,8 @@
+{
+  "version": "1.0",
+  "format": "fxs",
+  "schema": "gfe.smartfile.v1",
+  "tokenName": "Global File Exchange SmartFile",
+  "createdBy": "Global Data Capture LLC",
+  "description": "Authenticated SmartFile package for the Global File Exchange platform."
+}

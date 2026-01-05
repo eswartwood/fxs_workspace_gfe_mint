@@ -1,0 +1,57 @@
+{
+  "name": "fxs-player",
+  "version": "0.1.0",
+  "private": true,
+  "description": "FXS SmartFile Viewer by Global Data Capture",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "dependencies": {
+    "electron-window-state": "^5.0.3",
+    "jszip": "^3.10.1",
+    "open": "^11.0.0"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3",
+    "png-to-ico": "^3.0.1"
+  },
+  "build": {
+    "appId": "com.globaldatacapture.fxsviewer",
+    "productName": "FXS SmartFile Viewer",
+    "files": [
+      "**/*"
+    ],
+    "asar": true,
+    "fileAssociations": [
+      {
+        "ext": "fxs",
+        "name": "FXS Smart File",
+        "description": "FXS Smart Container",
+        "role": "Viewer"
+      }
+    ],
+    "protocols": [
+      {
+        "name": "FXS Protocol",
+        "schemes": [
+          "ftx"
+        ]
+      }
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": "nsis"
+    },
+    "mac": {
+      "icon": "build/icon.icns",
+      "category": "public.app-category.music",
+      "entitlements": "entitlements.mac.plist",
+      "hardenedRuntime": true
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "signature_version": "1.0.0",
+  "engine_id": "ENG-REPLACE",
+  "credential_id": "CRED-REPLACE",
+  "asset_id": "FXS-REPLACE",
+  "hashes": {
+    "media": {
+      "file_path": "media/asset.placeholder",
+      "algorithm": "SHA-256",
+      "hash": "REPLACE_WITH_MEDIA_HASH"
+    },
+    "metadata": {
+      "file_path": "metadata/meta.json",
+      "algorithm": "SHA-256",
+      "hash": "REPLACE_WITH_METADATA_HASH"
+    },
+    "license": {
+      "file_path": "license/license.json",
+      "algorithm": "SHA-256",
+      "hash": "REPLACE_WITH_LICENSE_HASH"
+    },
+    "credentials": {
+      "file_path": "credentials/owner.json",
+      "algorithm": "SHA-256",
+      "hash": "REPLACE_WITH_CREDENTIALS_HASH"
+    },
+    "player_config": {
+      "file_path": "engine/player.json",
+      "algorithm": "SHA-256",
+      "hash": "REPLACE_WITH_PLAYER_HASH"
+    },
+    "certificate": {
+      "file_path": "cert/certificate.png",
+      "algorithm": "SHA-256",
+      "hash": "REPLACE_WITH_CERT_HASH"
+    }
+  },
+  "bundle_hash": {
+    "algorithm": "SHA-256",
+    "hash_of": [
+      "media",
+      "metadata",
+      "license",
+      "credentials",
+      "player_config",
+      "certificate"
+    ],
+    "hash": "REPLACE_WITH_BUNDLE_HASH"
+  },
+  "signing": {
+    "algorithm": null,
+    "public_key": null,
+    "signature": null,
+    "signed_at": null,
+    "signing_tool": null,
+    "signing_tool_version": null
+  },
+  "validation": {
+    "expected_fxs_version": "1.0.0",
+    "notes": "Populate hashes and (optionally) digital signatures during build."
+  }
+}

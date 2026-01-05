@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FXS SmartFile Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root {
+      --bg: #05070b;
+      --bg-alt: #0d1118;
+      --panel: #111722;
+      --panel-alt: #151b28;
+      --accent: #f4c96b;
+      --accent-soft: rgba(244, 201, 107, 0.18);
+      --accent-strong: #ffdd88;
+      --text: #f5f7ff;
+      --text-soft: #a9b4d4;
+      --danger: #ff4f6a;
+      --border-soft: #252b3a;
+      --badge-bg: #182131;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-pill: 999px;
+      --shadow-soft: 0 26px 60px rgba(0,0,0,0.85);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top, #101626 0, #020308 55%);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .frame {
+      width: 100%;
+      max-width: 1200px;
+      padding: 24px 18px 40px;
+      margin: 0 auto;
+    }
+
+    .chrome {
+      border-radius: 26px;
+      padding: 1px;
+      background:
+        linear-gradient(130deg, rgba(255,255,255,0.25), transparent 40%),
+        radial-gradient(circle at 0 0, #f4c96b 0, transparent 60%),
+        radial-gradient(circle at 100% 0, #4ad0ff 0, transparent 60%),
+        radial-gradient(circle at 0 100%, #956bff 0, transparent 55%);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .chrome-inner {
+      border-radius: 25px;
+      background: radial-gradient(circle at top, #151b25 0, #05060a 58%);
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 20px 22px 26px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .brand-lockup {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      background: radial-gradient(circle at 30% 0, #fff 0, #f4c96b 24%, #543100 65%);
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.8), 0 14px 28px rgba(0,0,0,0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .brand-mark::after {
+      content: ".FXS";
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      color: #1c1300;
+      text-shadow: 0 0 6px rgba(255,255,255,0.7);
+    }
+
+    .brand-text h1 {
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent-strong);
+    }
+
+    .brand-text p {
+      margin: 0;
+      font-size: 11px;
+      color: var(--text-soft);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 11px;
+      border-radius: var(--radius-pill);
+      background: rgba(5, 209, 110, 0.1);
+      border: 1px solid rgba(48, 222, 143, 0.5);
+      font-size: 11px;
+      color: #7ff7b8;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #30de8f;
+      box-shadow: 0 0 12px rgba(48, 222, 143, 0.9);
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.1fr);
+      gap: 18px;
+    }
+
+    @media (max-width: 880px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: radial-gradient(circle at top, #1a2231 0, #080b11 70%);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-soft);
+      padding: 16px 16px 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top left, rgba(255,255,255,0.04), transparent 55%);
+      pointer-events: none;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .panel-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-soft);
+    }
+
+    .panel-subtitle {
+      font-size: 11px;
+      color: var(--text-soft);
+      margin-top: 2px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
+      border-radius: var(--radius-pill);
+      background: var(--badge-bg);
+      border: 1px solid rgba(255,255,255,0.06);
+      font-size: 11px;
+      color: var(--text-soft);
+      white-space: nowrap;
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    .badge-pill {
+      border-radius: var(--radius-pill);
+      padding: 4px 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: linear-gradient(135deg, rgba(244, 201, 107, 0.18), rgba(38, 24, 0, 0.7));
+      font-size: 11px;
+      color: var(--accent-strong);
+      text-transform: uppercase;
+      letter-spacing: 0.10em;
+    }
+
+    .media-shell {
+      border-radius: 14px;
+      background: radial-gradient(circle at top, #232d3f 0, #04060a 70%);
+      border: 1px solid rgba(255,255,255,0.04);
+      padding: 10px;
+      box-shadow: 0 14px 30px rgba(0,0,0,0.85);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .media-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 0 0, rgba(244, 201, 107, 0.18), transparent 50%);
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    .media-inner {
+      border-radius: 10px;
+      overflow: hidden;
+      background: #000;
+      position: relative;
+      aspect-ratio: 16 / 9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    video, img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: radial-gradient(circle at top, #000 0, #020308 70%);
+    }
+
+    .media-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 12px;
+      color: var(--text-soft);
+      font-size: 12px;
+      pointer-events: none;
+    }
+
+    .media-placeholder-icon {
+      width: 68px;
+      height: 68px;
+      border-radius: 20px;
+      background: radial-gradient(circle at 30% 0, #fff 0, #f4c96b 24%, #543100 65%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.9);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .media-placeholder-icon::after {
+      content: "FXS";
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: 0.18em;
+      color: #1c1300;
+      text-shadow: 0 0 8px rgba(255,255,255,0.8);
+    }
+
+    .button-row {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    button,
+    .btn-link {
+      border: none;
+      border-radius: var(--radius-pill);
+      padding: 7px 13px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: transform 0.09s ease-out, box-shadow 0.09s ease-out,
+        background 0.12s ease-out, border-color 0.12s ease-out;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #f4c96b, #ffdd99);
+      color: #2b1700;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.9);
+      border: 1px solid rgba(255,255,255,0.25);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 30px rgba(0,0,0,0.9);
+    }
+
+    .btn-ghost {
+      background: rgba(7, 11, 18, 0.96);
+      color: var(--text-soft);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .btn-ghost:hover {
+      border-color: rgba(255,255,255,0.22);
+      background: rgba(18, 24, 36, 0.96);
+    }
+
+    .label-pill {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-soft);
+    }
+
+    .field-grid {
+      margin-top: 6px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 12px;
+    }
+
+    @media (max-width: 680px) {
+      .field-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .field {
+      font-size: 12px;
+    }
+
+    .field-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-soft);
+      margin-bottom: 2px;
+    }
+
+    .field-value {
+      font-size: 13px;
+      color: var(--text);
+      word-break: break-all;
+    }
+
+    .field-value.soft {
+      color: var(--text-soft);
+    }
+
+    .divider {
+      height: 1px;
+      background: radial-gradient(circle at center, rgba(244, 201, 107, 0.3), rgba(255,255,255,0.04), transparent);
+      margin: 10px 0;
+    }
+
+    footer {
+      margin-top: 10px;
+      font-size: 10px;
+      color: var(--text-soft);
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      opacity: 0.9;
+    }
+
+    .mono {
+      font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .offline-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(248,86,114,0.55);
+      background: rgba(248,86,114,0.1);
+      color: var(--danger);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .offline-pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--danger);
+      box-shadow: 0 0 10px rgba(248,86,114,0.9);
+    }
+
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="chrome">
+      <div class="chrome-inner">
+
+        <header>
+          <div class="brand-lockup">
+            <div class="brand-mark"></div>
+            <div class="brand-text">
+              <h1>The Global File Exchange</h1>
+              <p>Authenticated FXS SmartFile</p>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;min-width:0;">
+            <div class="status-chip">
+              <span class="status-dot"></span>
+              <span id="chip-status">LOCAL VAULT</span>
+            </div>
+            <div class="offline-pill">
+              <span class="offline-pill-dot"></span>
+              <span>Offline preview &bull; dashboard ping disabled</span>
+            </div>
+          </div>
+        </header>
+
+        <main>
+          <!-- LEFT: Primary media -->
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">Primary asset</div>
+                <div class="panel-subtitle" id="asset-subtitle">
+                  This SmartFile can hold a video, image, audio, or document.
+                </div>
+              </div>
+              <div class="badge-pill" id="asset-type-pill">Asset: pending</div>
+            </div>
+
+            <div class="media-shell">
+              <div class="media-inner" id="primary-asset-slot">
+                <video id="assetVideo" controls playsinline style="display:none;"></video>
+                <img id="assetImage" alt="SmartFile asset" style="display:none;" />
+                <div id="mediaPlaceholder" class="media-placeholder">
+                  <div class="media-placeholder-icon"></div>
+                  <div>Asset will appear here after SmartFile loads.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="button-row">
+              <a id="btn-download-asset" href="#" class="btn-primary" download style="display:none;">
+                ⬇︎ Download asset
+              </a>
+              <a id="btn-open-certificate" href="certificate.png" target="_blank" class="btn-ghost">
+                🧾 View ownership certificate
+              </a>
+            </div>
+          </section>
+
+          <!-- RIGHT: Ownership / metadata -->
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">Ownership & on-chain context</div>
+                <div class="panel-subtitle">
+                  Fields below are populated from this SmartFile’s header + metadata.
+                </div>
+              </div>
+              <div class="badge">
+                <span class="badge-dot"></span>
+                <span id="badge-network" class="mono">Network: offline</span>
+              </div>
+            </div>
+
+            <div class="label-pill">Asset details</div>
+            <div class="field-grid">
+              <div class="field">
+                <div class="field-label">Title</div>
+                <div id="field-title" class="field-value">Loading…</div>
+              </div>
+              <div class="field">
+                <div class="field-label">Token ID</div>
+                <div id="field-tokenId" class="field-value mono soft">Loading…</div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="label-pill">Ownership</div>
+            <div class="field-grid">
+              <div class="field">
+                <div class="field-label">Owner wallet</div>
+                <div id="field-owner" class="field-value mono soft">Loading…</div>
+              </div>
+              <div class="field">
+                <div class="field-label">Creator</div>
+                <div id="field-creator" class="field-value soft">Loading…</div>
+              </div>
+              <div class="field">
+                <div class="field-label">Issued</div>
+                <div id="field-issued" class="field-value soft">Loading…</div>
+              </div>
+              <div class="field">
+                <div class="field-label">Credential ID</div>
+                <div id="field-credential" class="field-value mono soft">Loading…</div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="label-pill">Actions</div>
+            <div class="button-row">
+              <a id="btn-open-dashboard" href="#" target="_blank" class="btn-ghost">
+                🔭 Open dashboard
+              </a>
+            </div>
+
+                <!-- Embedded metadata for offline / double-click mode -->
+    <script src="metadata/embedded-meta.js"></script>
+
+    <!-- Main viewer logic -->
+    <script src="viewer.js"></script>
+  </body>
+</html>
+
+

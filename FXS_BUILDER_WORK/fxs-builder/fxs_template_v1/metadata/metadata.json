@@ -1,0 +1,43 @@
+{
+  "fxs_version": "1.0.0",
+  "engine_id": "GFE-LOCAL-BUILDER",
+  "credential_id": "FFX-0001",
+  "title": "FFX Test Asset",
+  "subtitle": "Local build test",
+  "description": "Local SmartFile build for viewer wiring and double-click simulation.",
+  "category": "platform",
+  "tags": ["fxs", "smartfile"],
+
+  "created_at": "REPLACE_WITH_ISO_DATETIME",
+  "minted_at": "REPLACE_WITH_ISO_DATETIME",
+  "timezone": "America/New_York",
+
+  "creator": {
+    "name": "Eric Swartwood",
+    "role": "Creator",
+    "wallet_address": "0xCREATOR_WALLET_PLACEHOLDER",
+    "contact_email": "eswartwood@globaldatacapture.com",
+    "website": "https://globaldatacapture.com"
+  },
+
+  "current_owner": {
+    "name": "Eric Swartwood",
+    "role": "Owner",
+    "wallet_address": "0xOWNER_WALLET_PLACEHOLDER",
+    "ownership_type": "founder",
+    "acquired_at": "REPLACE_WITH_ISO_DATETIME"
+  },
+
+  "media": {
+    "file_path": "media/asset.mp4",
+    "display_name": "asset.mp4",
+    "mime_type": "video/mp4",
+    "byte_size": 0,
+    "duration_seconds": 0,
+    "hash_sha256": ""
+  },
+
+  "metrics": {
+    "opens": 0
+  }
+}

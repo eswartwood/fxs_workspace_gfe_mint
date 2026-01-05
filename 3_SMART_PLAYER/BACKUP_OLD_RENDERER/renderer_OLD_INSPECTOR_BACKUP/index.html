@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FXS Smart File Viewer - Global File Exchange</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <img class="brand-logo" src="gfe-coin.png" alt="Global File Exchange"/>
+        <div class="brand-text">
+          <div class="brand-name">GLOBAL FILE EXCHANGE</div>
+          <div class="brand-sub">FXS Smart File Inspector</div>
+        </div>
+      </div>
+      <div class="pill">ON‑CHAIN CREDENTIAL VIEWER</div>
+    </header>
+
+    <main>
+      <h1>FXS Smart File Viewer</h1>
+      <p class="subtitle">
+        Inspect any <b>.fxs</b> file: metadata, credentials, license, embedded media, ownership, and engine IDs.
+      </p>
+
+      <div class="controls">
+        <label class="file-btn">
+          Choose File
+          <input id="fileInput" type="file" accept=".fxs"/>
+        </label>
+        <span id="fileName" class="file-name">No file chosen</span>
+        <button id="openBtn" class="open-btn" disabled>Open FXS File</button>
+      </div>
+
+      <div id="dropzone" class="dropzone">
+        <div class="dz-inner">
+          <img class="dz-icon" src="fxs-file-icon.png" alt="FXS"/>
+          <div>
+            <div class="dz-title">Drop an FXS file here</div>
+            <div class="dz-sub">or use the file picker above. Your file never leaves this device.</div>
+          </div>
+        </div>
+      </div>
+
+      <section class="grid">
+        <div class="panel summary">
+          <h2>SUMMARY</h2>
+          <div class="kv"><span>Title:</span><b id="sumTitle">—</b></div>
+          <div class="kv"><span>Subtitle:</span><b id="sumSubtitle">—</b></div>
+          <div class="kv"><span>Description:</span><b id="sumDescription">—</b></div>
+          <div class="kv"><span>Creator:</span><b id="sumCreator">—</b></div>
+          <div class="kv"><span>Owner:</span><b id="sumOwner">—</b></div>
+          <div class="kv"><span>Network:</span><b id="sumNetwork">—</b></div>
+          <div class="kv"><span>Token:</span><b id="sumToken">—</b></div>
+
+          <div class="engine-row">
+            <span class="badge">FXS SMART FILE</span>
+            <span>engine:</span><b id="sumEngine">—</b>
+            <span class="dot">•</span>
+            <span>credential:</span><b id="sumCredential">—</b>
+          </div>
+
+          <div id="status" class="status">No file loaded.</div>
+        </div>
+
+        <div class="panel details">
+          <h2>METADATA JSON</h2>
+          <textarea id="metaBox" readonly placeholder="Load an FXS file to view metadata..."></textarea>
+
+          <h2>LICENSE SUMMARY</h2>
+          <textarea id="licenseBox" readonly placeholder="Load an FXS file to view license..."></textarea>
+
+          <h2>CREDENTIALS</h2>
+          <textarea id="credBox" readonly placeholder="Load an FXS file to view credentials..."></textarea>
+        </div>
+      </section>
+
+      <footer>
+        <div class="foot-left">FXS Inspector • v0.1 prototype</div>
+        <div class="foot-right">drag &amp; drop an FXS to begin</div>
+      </footer>
+    </main>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

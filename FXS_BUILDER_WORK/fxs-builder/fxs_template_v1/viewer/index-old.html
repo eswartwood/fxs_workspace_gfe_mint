@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>The Global File Exchange • FXS SmartFile</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Viewer styles + logic -->
+  <link rel="stylesheet" href="viewer.css" />
+  <script defer src="viewer.js"></script>
+</head>
+<body>
+  <div id="page">
+    <!-- TOP HERO / BRANDING -->
+    <header class="gfe-header">
+      <div class="gfe-header-inner">
+        <!-- Left: Global File Exchange coin -->
+        <div class="gfe-coin-wrap">
+          <img
+            src="gfe-coin.png"
+            alt="Global File Exchange"
+            class="gfe-coin"
+          />
+        </div>
+
+        <!-- Right: File icon + headings -->
+        <div class="gfe-header-text">
+          <div class="gfe-file-pill">
+            <img
+              src="file-icon.png"
+              alt="FXS Smart File"
+              class="gfe-file-icon"
+            />
+            <div class="gfe-file-pill-text">
+              <h1 class="gfe-title">The Global File Exchange</h1>
+              <p class="gfe-tagline">Authenticated FXS SmartFile</p>
+              <p class="gfe-sub">
+                Packaged media, license, and metadata in a single smart file.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT: CERTIFICATE + METADATA -->
+    <main class="gfe-main">
+      <!-- Certificate panel -->
+      <section class="panel cert-panel">
+        <h2 class="panel-title">On-Chain Credential</h2>
+        <div class="cert-frame">
+          <img
+            src="certificate.png"
+            alt="Global File Exchange certificate"
+            class="cert-image"
+          />
+        </div>
+      </section>
+
+      <!-- Metadata panel -->
+      <section class="panel meta-panel">
+        <h2 class="panel-title">SmartFile Details</h2>
+
+        <div id="metadata-box">
+          <!-- viewer.js will fill this <pre> with parsed metadata -->
+          <pre id="metadata-pre">
+Loading SmartFile metadata…
+          </pre>
+        </div>
+
+        <p id="footer-note">
+          This FXS SmartFile was issued by the Global File Exchange. Rights,
+          licenses, and access rules are strictly governed by the metadata
+          contained within this file.
+        </p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

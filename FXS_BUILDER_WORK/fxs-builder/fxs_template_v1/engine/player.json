@@ -1,0 +1,59 @@
+{
+  "player_config_version": "1.0.0",
+  "engine_id": "ENG-REPLACE",
+  "credential_id": "CRED-REPLACE",
+  "asset_type": "platform",
+  "media_type": "video",
+  "primary_media_file": "media/asset.placeholder",
+  "behavior": {
+    "auto_play": true,
+    "loop": false,
+    "start_muted": false,
+    "show_playback_controls": true,
+    "show_timeline": true
+  },
+  "ui": {
+    "show_title": true,
+    "show_subtitle": true,
+    "show_creator": true,
+    "show_current_owner": true,
+    "show_license_summary": true,
+    "show_certificate_button": true,
+    "show_dashboard_button": true,
+    "show_owner_history": false
+  },
+  "links": {
+    "dashboard_url": "https://theglobaltokenexchange.com/dashboard",
+    "holder_portal_url": "https://theglobaltokenexchange.com/holders",
+    "learn_more_url": "https://theglobaltokenexchange.com/what-is-fxs"
+  },
+  "validation": {
+    "require_online_validation": true,
+    "allow_offline_playback_if_signature_valid": true,
+    "block_play_if_tampered": true,
+    "show_warning_on_validation_failure": true
+  },
+  "offline_behavior": {
+    "allow_offline_playback": true,
+    "show_offline_notice": true,
+    "offline_notice_text": "You are viewing this FXS Smart File offline. Some on-chain features may be unavailable."
+  },
+  "panels": {
+    "default_open_panel": "media",
+    "available_panels": [
+      "media",
+      "details",
+      "license",
+      "certificate"
+    ]
+  },
+  "branding": {
+    "theme": "dark",
+    "accent_style": "gold",
+    "show_gte_logo": true,
+    "show_fxs_badge": true
+  },
+  "min_player_version": "1.0.0",
+  "recommended_player_version": "1.0.0",
+  "notes": "Default player config for FXS Smart File."
+}
