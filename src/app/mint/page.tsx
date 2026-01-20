@@ -1,488 +1,219 @@
-// src/app/mint/page.tsx
-import React from 'react';
-import Link from 'next/link';
+'use client';
 
-export default function MintPage() {
+import React, { useState } from 'react';
+
+type MintStatus = 'idle' | 'minting' | 'success' | 'error';
+
+export default function Home() {
+  const [status, setStatus] = useState<MintStatus>('idle');
+  const [message, setMessage] = useState<string>('');
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+
+    setStatus('minting');
+    setMessage('');
+
+    try {
+      const formData = new FormData(form);
+
+      const res = await fetch('/api/mint', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        let errorText = 'Mint failed on the server.';
+        try {
+          const data = await res.json();
+          if (data?.error) errorText = data.error;
+        } catch {
+          // ignore JSON parse error, keep default
+        }
+        setStatus('error');
+        setMessage(errorText);
+        return;
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const title = (formData.get('title') as string) || 'smartfile';
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${title.replace(/[^\w\-]+/g, '_')}.fxs`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      setStatus('success');
+      setMessage('Mint complete. SmartFile downloaded.');
+
+      form.reset();
+    } catch (err: any) {
+      console.error('Mint client error:', err);
+      setStatus('error');
+      setMessage('Mint failed. Please try again.');
+    }
+  }
+
+  const isMinting = status === 'minting';
+
   return (
-    <main
-      style={{
-        minHeight: '100vh',
-        padding: '40px 24px',
-        display: 'flex',
-        justifyContent: 'center',
-        background:
-          'radial-gradient(circle at top, #1f2933 0, #020617 45%, #000000 100%)',
-        color: '#f9fafb',
-        fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-      }}
-    >
-      <div
-        style={{
-          width: '100%',
-          maxWidth: 960,
-          background: 'rgba(15,23,42,0.9)',
-          borderRadius: 24,
-          border: '1px solid rgba(148,163,184,0.3)',
-          boxShadow: '0 24px 80px rgba(0,0,0,0.8)',
-          padding: 32,
-        }}
-      >
-        {/* Top bar */}
-        <header
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: 32,
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            {/* Placeholder for the GFE seal – you can swap this for the real PNG later */}
-            <div
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: '50%',
-                border: '2px solid #e5e7eb',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 12,
-                fontWeight: 700,
-                letterSpacing: 0.12,
-              }}
-            >
-              GFE
-            </div>
+    <main className="min-h-screen flex items-center justify-center bg-zinc-950 text-zinc-50">
+      <div className="w-full max-w-4xl px-4">
+        <div className="bg-zinc-900/80 border border-zinc-800 shadow-2xl rounded-3xl px-8 py-10 sm:px-10 sm:py-12">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 mb-10">
             <div>
-              <div
-                style={{
-                  fontSize: 16,
-                  fontWeight: 700,
-                  letterSpacing: 2,
-                  textTransform: 'uppercase',
-                }}
-              >
-                Global File Exchange
-              </div>
-              <div
-                style={{
-                  fontSize: 12,
-                  color: '#9ca3af',
-                  letterSpacing: 1.2,
-                  textTransform: 'uppercase',
-                }}
-              >
-                Credential &amp; Provenance
-              </div>
-            </div>
-          </div>
-
-          <nav
-            style={{
-              display: 'flex',
-              gap: 16,
-              fontSize: 13,
-              letterSpacing: 1.4,
-              textTransform: 'uppercase',
-            }}
-          >
-            <Link href="https://globaldatacapture.com" style={{ color: '#9ca3af' }}>
-              GDC
-            </Link>
-            <span style={{ color: '#4b5563' }}>•</span>
-            <span style={{ color: '#e5e7eb' }}>Mint Media</span>
-          </nav>
-        </header>
-
-        {/* Intro copy */}
-        <section style={{ marginBottom: 28 }}>
-          <div
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              letterSpacing: 2,
-              textTransform: 'uppercase',
-              color: '#9ca3af',
-              marginBottom: 8,
-            }}
-          >
-            Media Mint
-          </div>
-          <h1
-            style={{
-              fontSize: 28,
-              lineHeight: 1.2,
-              fontWeight: 800,
-              marginBottom: 8,
-            }}
-          >
-            Mint a credentialed file from your media.
-          </h1>
-          <p style={{ fontSize: 14, color: '#9ca3af', maxWidth: 640 }}>
-            Upload a single piece of media and attach the identity details you want
-            locked to it. We’ll return a signed <code>.fxs</code> file that bundles
-            your content, metadata, and certificate structure in one container.
-          </p>
-        </section>
-
-        {/* Mint form */}
-        <form
-          method="POST"
-          action="/api/mint"
-          encType="multipart/form-data"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1.2fr)',
-            gap: 24,
-          }}
-        >
-          {/* Left column – media + identity */}
-          <div
-            style={{
-              padding: 20,
-              borderRadius: 16,
-              border: '1px solid rgba(55,65,81,0.8)',
-              background: 'linear-gradient(135deg,#020617,#020617 55%,#020617)',
-            }}
-          >
-            <h2
-              style={{
-                fontSize: 14,
-                textTransform: 'uppercase',
-                letterSpacing: 2,
-                color: '#9ca3af',
-                marginBottom: 16,
-              }}
-            >
-              Media &amp; Identity
-            </h2>
-
-            {/* Media file */}
-            <div style={{ marginBottom: 16 }}>
-              <label
-                htmlFor="media"
-                style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}
-              >
-                Media file<span style={{ color: '#f97316' }}> *</span>
-              </label>
-              <input
-                id="media"
-                name="media"
-                type="file"
-                required
-                style={{
-                  width: '100%',
-                  fontSize: 13,
-                  padding: '8px 10px',
-                  borderRadius: 8,
-                  border: '1px solid #4b5563',
-                  backgroundColor: '#020617',
-                }}
-              />
-              <p style={{ marginTop: 4, fontSize: 11, color: '#6b7280' }}>
-                Accepted: audio, video, image, or document files.
+              <p className="text-xs tracking-[0.25em] text-emerald-400 uppercase mb-2">
+                GFE SmartFile Mint
               </p>
+              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
+                Wrap a media file and metadata into a single signed FXS
+                SmartFile.
+              </h1>
             </div>
-
-            {/* Title */}
-            <div style={{ marginBottom: 12 }}>
-              <label
-                htmlFor="title"
-                style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 4 }}
-              >
-                Title<span style={{ color: '#f97316' }}> *</span>
-              </label>
-              <input
-                id="title"
-                name="title"
-                type="text"
-                required
-                placeholder="Example: Timberland Rising – Trailer v1"
-                style={{
-                  width: '100%',
-                  fontSize: 13,
-                  padding: '8px 10px',
-                  borderRadius: 8,
-                  border: '1px solid #4b5563',
-                  backgroundColor: '#020617',
-                }}
-              />
+            <div className="text-right text-xs sm:text-sm text-zinc-400 uppercase tracking-[0.2em]">
+              <div>Workspace ·</div>
+              <div>Internal</div>
             </div>
+          </div>
 
-            {/* Creator */}
-            <div style={{ marginBottom: 12, display: 'flex', gap: 12 }}>
-              <div style={{ flex: 1 }}>
+          <form
+            onSubmit={handleSubmit}
+            encType="multipart/form-data"
+            className="space-y-8"
+          >
+            {/* Row 1: Title / Creator */}
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div className="space-y-2">
+                <label
+                  htmlFor="title"
+                  className="text-xs font-medium tracking-wide text-zinc-300 uppercase"
+                >
+                  Title<span className="text-emerald-400"> *</span>
+                </label>
+                <input
+                  id="title"
+                  name="title"
+                  type="text"
+                  required
+                  className="w-full rounded-xl border border-zinc-700 bg-zinc-900/60 px-4 py-2.5 text-sm outline-none ring-0 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/40"
+                  placeholder="FXS SmartFile – Test Asset 01"
+                />
+              </div>
+
+              <div className="space-y-2">
                 <label
                   htmlFor="creator"
-                  style={{
-                    display: 'block',
-                    fontSize: 13,
-                    fontWeight: 600,
-                    marginBottom: 4,
-                  }}
+                  className="text-xs font-medium tracking-wide text-zinc-300 uppercase"
                 >
-                  Creator / Owner<span style={{ color: '#f97316' }}> *</span>
+                  Creator / Owner<span className="text-emerald-400"> *</span>
                 </label>
                 <input
                   id="creator"
                   name="creator"
                   type="text"
                   required
-                  placeholder="Eric Swartwood"
-                  style={{
-                    width: '100%',
-                    fontSize: 13,
-                    padding: '8px 10px',
-                    borderRadius: 8,
-                    border: '1px solid #4b5563',
-                    backgroundColor: '#020617',
-                  }}
+                  className="w-full rounded-xl border border-zinc-700 bg-zinc-900/60 px-4 py-2.5 text-sm outline-none ring-0 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/40"
+                  placeholder="Global Data Capture, LLC"
                 />
               </div>
+            </div>
 
-              <div style={{ flex: 1 }}>
+            {/* Row 2: Email / File */}
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div className="space-y-2">
                 <label
                   htmlFor="email"
-                  style={{
-                    display: 'block',
-                    fontSize: 13,
-                    fontWeight: 600,
-                    marginBottom: 4,
-                  }}
+                  className="text-xs font-medium tracking-wide text-zinc-300 uppercase"
                 >
-                  Contact email (optional)
+                  Notification Email<span className="text-emerald-400"> *</span>
                 </label>
                 <input
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="notifications@example.com"
-                  style={{
-                    width: '100%',
-                    fontSize: 13,
-                    padding: '8px 10px',
-                    borderRadius: 8,
-                    border: '1px solid #4b5563',
-                    backgroundColor: '#020617',
-                  }}
+                  required
+                  className="w-full rounded-xl border border-zinc-700 bg-zinc-900/60 px-4 py-2.5 text-sm outline-none ring-0 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/40"
+                  placeholder="minted@theglobaltokenexchange.com"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="file"
+                  className="text-xs font-medium tracking-wide text-zinc-300 uppercase"
+                >
+                  Media File<span className="text-emerald-400"> *</span>
+                </label>
+                <input
+                  id="file"
+                  name="file"
+                  type="file"
+                  required
+                  className="block w-full text-sm text-zinc-200 file:mr-4 file:rounded-lg file:border-0 file:bg-emerald-500 file:px-3 file:py-2 file:text-sm file:font-medium file:text-zinc-950 hover:file:bg-emerald-400"
+                />
+                <p className="text-xs text-zinc-400">
+                  Any binary payload (image, audio, video, PDF, etc.) up to your
+                  current workspace limit.
+                </p>
               </div>
             </div>
 
-            {/* Description */}
-            <div style={{ marginBottom: 12 }}>
+            {/* Notes */}
+            <div className="space-y-2">
               <label
-                htmlFor="description"
-                style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 4 }}
+                htmlFor="notes"
+                className="text-xs font-medium tracking-wide text-zinc-300 uppercase"
               >
-                Description
+                Internal Notes / License Terms
               </label>
               <textarea
-                id="description"
-                name="description"
-                rows={4}
-                placeholder="Short summary of what this media represents, where it comes from, or how it should be used."
-                style={{
-                  width: '100%',
-                  fontSize: 13,
-                  padding: '8px 10px',
-                  borderRadius: 8,
-                  border: '1px solid #4b5563',
-                  backgroundColor: '#020617',
-                  resize: 'vertical',
-                }}
+                id="notes"
+                name="notes"
+                rows={3}
+                className="w-full rounded-xl border border-zinc-700 bg-zinc-900/60 px-4 py-2.5 text-sm outline-none ring-0 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/40 resize-none"
+                placeholder="Optional. Embed any additional metadata or licensing language into the SmartFile header."
               />
             </div>
 
-            {/* Tags */}
-            <div style={{ marginBottom: 4 }}>
-              <label
-                htmlFor="tags"
-                style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 4 }}
-              >
-                Tags (comma separated)
-              </label>
-              <input
-                id="tags"
-                name="tags"
-                type="text"
-                placeholder="music, trailer, timberland, v1"
-                style={{
-                  width: '100%',
-                  fontSize: 13,
-                  padding: '8px 10px',
-                  borderRadius: 8,
-                  border: '1px solid #4b5563',
-                  backgroundColor: '#020617',
-                }}
-              />
-            </div>
-          </div>
+            {/* Output hint + button */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-2">
+              <p className="text-xs text-zinc-500">
+                Output: <span className="font-mono text-emerald-300">.fxs</span>{' '}
+                SmartFile · downloads directly to your device.
+              </p>
 
-          {/* Right column – rights & output */}
-          <div
-            style={{
-              padding: 20,
-              borderRadius: 16,
-              border: '1px solid rgba(55,65,81,0.8)',
-              background:
-                'radial-gradient(circle at top, rgba(30,64,175,0.25), #020617 55%, #020617)',
-            }}
-          >
-            <h2
-              style={{
-                fontSize: 14,
-                textTransform: 'uppercase',
-                letterSpacing: 2,
-                color: '#9ca3af',
-                marginBottom: 16,
-              }}
-            >
-              Rights &amp; Output
-            </h2>
-
-            {/* Rights selection */}
-            <div style={{ marginBottom: 12 }}>
-              <label
-                htmlFor="rights"
-                style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 4 }}
+              <button
+                type="submit"
+                disabled={isMinting}
+                className={`inline-flex items-center rounded-2xl px-6 py-2.5 text-sm font-semibold shadow-lg shadow-emerald-500/40 transition ${
+                  isMinting
+                    ? 'bg-emerald-700/70 text-zinc-100 cursor-wait'
+                    : 'bg-emerald-500 text-zinc-950 hover:bg-emerald-400'
+                }`}
               >
-                Rights label
-              </label>
-              <select
-                id="rights"
-                name="rights"
-                defaultValue="all-rights-reserved"
-                style={{
-                  width: '100%',
-                  fontSize: 13,
-                  padding: '8px 10px',
-                  borderRadius: 8,
-                  border: '1px solid #4b5563',
-                  backgroundColor: '#020617',
-                  color: '#e5e7eb',
-                }}
-              >
-                <option value="all-rights-reserved">All rights reserved</option>
-                <option value="personal-noncommercial">Personal / non-commercial use</option>
-                <option value="custom-license">Custom license (see description)</option>
-              </select>
+                {isMinting ? 'Minting…' : 'Mint SmartFile'}
+              </button>
             </div>
 
-            {/* Reference URL */}
-            <div style={{ marginBottom: 12 }}>
-              <label
-                htmlFor="referenceUrl"
-                style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 4 }}
+            {/* Status banner */}
+            {status !== 'idle' && message && (
+              <div
+                className={`mt-4 rounded-xl border px-4 py-3 text-sm ${
+                  status === 'success'
+                    ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
+                    : 'border-red-500/40 bg-red-500/10 text-red-300'
+                }`}
               >
-                Reference URL (optional)
-              </label>
-              <input
-                id="referenceUrl"
-                name="referenceUrl"
-                type="url"
-                placeholder="Link where this media will live (YouTube, site, etc.)"
-                style={{
-                  width: '100%',
-                  fontSize: 13,
-                  padding: '8px 10px',
-                  borderRadius: 8,
-                  border: '1px solid #4b5563',
-                  backgroundColor: '#020617',
-                }}
-              />
-            </div>
-
-            {/* Internal reference / project id */}
-            <div style={{ marginBottom: 16 }}>
-              <label
-                htmlFor="referenceId"
-                style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 4 }}
-              >
-                Internal reference ID (optional)
-              </label>
-              <input
-                id="referenceId"
-                name="referenceId"
-                type="text"
-                placeholder="e.g. GFE-MEDIA-0001"
-                style={{
-                  width: '100%',
-                  fontSize: 13,
-                  padding: '8px 10px',
-                  borderRadius: 8,
-                  border: '1px solid #4b5563',
-                  backgroundColor: '#020617',
-                }}
-              />
-            </div>
-
-            {/* Summary box */}
-            <div
-              style={{
-                fontSize: 12,
-                color: '#d1d5db',
-                background: 'rgba(15,23,42,0.9)',
-                borderRadius: 12,
-                border: '1px solid rgba(55,65,81,0.9)',
-                padding: 12,
-                marginBottom: 16,
-              }}
-            >
-              <strong style={{ display: 'block', marginBottom: 4 }}>
-                What happens when you mint
-              </strong>
-              <ul style={{ paddingLeft: 18, margin: 0, listStyle: 'disc' }}>
-                <li>
-                  Your media and metadata are packaged into a signed{' '}
-                  <code>.fxs</code> file.
-                </li>
-                <li>The file is returned to you for download immediately.</li>
-                <li>
-                  A copy can later be registered on-chain for pricing and
-                  monetization.
-                </li>
-              </ul>
-            </div>
-
-            {/* Submit */}
-            <button
-              type="submit"
-              style={{
-                width: '100%',
-                marginTop: 4,
-                padding: '10px 14px',
-                borderRadius: 999,
-                border: 'none',
-                fontSize: 14,
-                fontWeight: 700,
-                letterSpacing: 1.4,
-                textTransform: 'uppercase',
-                cursor: 'pointer',
-                background:
-                  'linear-gradient(135deg, #f97316, #facc15)',
-                color: '#111827',
-                boxShadow: '0 14px 40px rgba(251,191,36,0.35)',
-              }}
-            >
-              Mint credentialed file
-            </button>
-
-            <p
-              style={{
-                marginTop: 8,
-                fontSize: 11,
-                color: '#6b7280',
-                lineHeight: 1.4,
-              }}
-            >
-              On submit, this page sends your details to the Global File Exchange
-              builder and returns a downloadable <code>.fxs</code> file in your
-              browser. No on-chain mint or email is triggered yet.
-            </p>
-          </div>
-        </form>
+                {message}
+              </div>
+            )}
+          </form>
+        </div>
       </div>
     </main>
   );

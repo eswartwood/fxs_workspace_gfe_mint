@@ -1,54 +1,65 @@
-import fs from "fs";
-import path from "path";
+// src/builder/fxs-builder.ts
+
+// Types for our metadata + payload
+export interface FxsMetadata {
+  title: string;
+  creator: string;
+  email: string;
+  notes?: string;
+  mintedAt: string;
+  workspace?: string;
+  [key: string]: any;
+}
+
+export interface FxsPayloadInput {
+  filename: string;
+  mimeType: string;
+  data: Buffer; // raw bytes of the media file
+}
 
 /**
- * Build a real .fxs SmartFile
- * - Embeds header.json
- * - Embeds metadata.json (with auto timestamp)
- * - Embeds certificate.png
- * - Embeds the user’s media file
- * - Produces a structured .fxs container
+ * buildFXS
+ * ----------
+ * Pure in-memory FXS SmartFile builder.
+ *
+ * Binary layout:
+ *   [4 bytes]  ASCII "FXS1" magic
+ *   [4 bytes]  header length (uint32 big-endian)
+ *   [N bytes]  UTF-8 JSON header
+ *   [M bytes]  raw media payload
  */
+export async function buildFXS(
+  metadata: FxsMetadata,
+  payload: FxsPayloadInput
+): Promise<Buffer> {
+  // 1) Build header JSON
+  const header = {
+    version: '0.1.0',
+    type: 'fxs-smartfile',
+    createdAt: new Date().toISOString(),
+    metadata,
+    payload: {
+      filename: payload.filename,
+      mimeType: payload.mimeType,
+      length: payload.data.length,
+    },
+  };
 
-export async function buildFXS(fileBuffer: Buffer, workspaceDir: string) {
-  const templatesDir = path.join(workspaceDir, "src", "builder", "templates");
+  const headerJson = JSON.stringify(header, null, 2);
+  const headerBytes = Buffer.from(headerJson, 'utf8');
 
-  // Load header
-  const headerRaw = fs.readFileSync(path.join(templatesDir, "header.json"), "utf8");
-  const header = JSON.parse(headerRaw);
+  // 2) Magic + header length
+  const magic = Buffer.from('FXS1', 'ascii'); // 4 bytes
+  const headerLenBuf = Buffer.alloc(4);
+  headerLenBuf.writeUInt32BE(headerBytes.length, 0);
 
-  // Load & update metadata
-  const metadataPath = path.join(templatesDir, "metadata.json");
-  const metadataRaw = fs.readFileSync(metadataPath, "utf8");
-  const metadata = JSON.parse(metadataRaw);
-  metadata.timestamp = new Date().toISOString();
-
-  // Load certificate
-  const certificate = fs.readFileSync(path.join(templatesDir, "certificate.png"));
-
-  // --- PACKAGE FORMAT ---
-  // [HEADER LENGTH][HEADER JSON]
-  // [METADATA LENGTH][METADATA JSON]
-  // [CERT LENGTH][CERT BYTES]
-  // [MEDIA LENGTH][MEDIA BYTES]
-
-  function encodeSection(json: any | Buffer) {
-    const payload = Buffer.isBuffer(json)
-      ? json
-      : Buffer.from(JSON.stringify(json), "utf8");
-
-    const length = Buffer.alloc(4);
-    length.writeUInt32BE(payload.length);
-
-    return Buffer.concat([length, payload]);
-  }
-
-  const packaged = Buffer.concat([
-    encodeSection(header),
-    encodeSection(metadata),
-    encodeSection(certificate),
-    encodeSection(fileBuffer)
+  // 3) Concatenate: [magic][headerLen][header][payload]
+  const fxsBuffer = Buffer.concat([
+    magic,
+    headerLenBuf,
+    headerBytes,
+    payload.data,
   ]);
 
-  return packaged;
+  return fxsBuffer;
 }
