@@ -1,66 +1,83 @@
 // src/app/api/mint/route.ts
+
 import { NextResponse } from 'next/server';
 import { buildFXS, FxsMetadata, FxsPayloadInput } from '@/builder/fxs-builder';
+
+export const runtime = 'nodejs';
 
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
 
-    // For debug: log what actually arrived
-    const keys = Array.from(formData.keys());
-    console.log('Mint API received keys:', keys);
+    // Debug: see exactly what the form is sending
+    console.log('Mint API received keys:', Array.from(formData.keys()));
 
-    const title = formData.get('title') as string | null;
-    const creator = formData.get('creator') as string | null;
-    const email = formData.get('email') as string | null;
-    const notes = formData.get('notes') as string | null;
-    const file = formData.get('media') as File | null; // <-- key MUST be "media"
+    const titleEntry = formData.get('title');
+    const creatorEntry = formData.get('creator');
+    const emailEntry = formData.get('email');
+    const notesEntry = formData.get('notes');
+    const mediaEntry = formData.get('media');
 
-    const missing: string[] = [];
-    if (!title) missing.push('title');
-    if (!file) missing.push('file');
-
-    // creator + email are useful but not hard-stop if you want to keep it loose:
-    // if (!creator) missing.push('creator');
-    // if (!email) missing.push('email');
-
-    if (missing.length > 0) {
+    // ---- Basic validation (what the UI shows in the red bar) ----
+    if (!titleEntry || typeof titleEntry !== 'string') {
       return NextResponse.json(
-        {
-          error: `Missing required fields (${missing.join(', ')}).`,
-        },
-        { status: 400 },
+        { error: 'Missing required fields (title, file).' },
+        { status: 400 }
       );
     }
 
-    // At this point TS still thinks these might be null; runtime check above guarantees they’re not.
-    const safeTitle = title as string;
-    const mediaFile = file as File;
+    if (!(mediaEntry instanceof File)) {
+      return NextResponse.json(
+        { error: 'Missing required fields (title, file).' },
+        { status: 400 }
+      );
+    }
 
-    const metadata: FxsMetadata = {
-      title: safeTitle,
-      creator: (creator as string) || 'Global Data Capture, LLC',
-      email: (email as string) || '',
-      ...(notes ? { notes } : {}),
-      mintedAt: new Date().toISOString(),
-      workspace: 'GFE – Internal',
-    };
+    const title = titleEntry;
+    const creator =
+      typeof creatorEntry === 'string' && creatorEntry.trim().length > 0
+        ? creatorEntry
+        : 'Unknown';
+    const email =
+      typeof emailEntry === 'string' && emailEntry.trim().length > 0
+        ? emailEntry
+        : 'Unknown';
+    const notes =
+      typeof notesEntry === 'string' && notesEntry.trim().length > 0
+        ? notesEntry
+        : '';
 
-    const arrayBuffer = await mediaFile.arrayBuffer();
-    const mediaBuffer = Buffer.from(arrayBuffer);
+    const file = mediaEntry;
+
+    // ---- Convert uploaded file into a Buffer for the builder ----
+    const arrayBuffer = await file.arrayBuffer();
 
     const payload: FxsPayloadInput = {
-      filename: mediaFile.name,
-      mimeType: mediaFile.type || 'application/octet-stream',
-      data: mediaBuffer,
+      filename: file.name,
+      mimeType: file.type || 'application/octet-stream',
+      data: Buffer.from(arrayBuffer),
     };
 
+    const metadata: FxsMetadata = {
+      title,
+      creator,
+      email,
+      notes,
+      mintedAt: new Date().toISOString(),
+      workspace: 'internal',
+    };
+
+    // ---- Call the core builder to get the .fxs SmartFile ----
     const fxsBuffer = await buildFXS(metadata, payload);
 
-    const safeName = safeTitle.replace(/[^\w\-]+/g, '_');
-    const outFilename = `${safeName}.fxs`;
+    // Safe filename for download
+    const safeTitle = title.replace(/[^\w\-]+/g, '_');
+    const outFilename = `${safeTitle}.fxs`;
 
-    return new NextResponse(fxsBuffer, {
+    // NextResponse wants a web-friendly BodyInit, not a Node Buffer
+    const body = new Uint8Array(fxsBuffer);
+
+    return new NextResponse(body, {
       status: 200,
       headers: {
         'Content-Type': 'application/octet-stream',
@@ -69,12 +86,13 @@ export async function POST(req: Request) {
     });
   } catch (err: any) {
     console.error('Mint API error:', err);
+
     return NextResponse.json(
       {
         error: 'Mint failed on the server.',
         detail: err?.message ?? 'Unknown error',
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
