@@ -1,0 +1,77 @@
+{
+  "fxs_version": "1.0.0",
+  "engine_id": "ENG-REPLACE",
+  "credential_id": "CRED-REPLACE",
+  "title": "REPLACE_WITH_TITLE",
+  "subtitle": "REPLACE_WITH_SUBTITLE",
+  "description": "REPLACE_WITH_DESCRIPTION",
+  "category": "platform",
+  "tags": [
+    "fxs",
+    "smartfile"
+  ],
+  "created_at": "REPLACE_WITH_ISO_DATETIME",
+  "minted_at": "REPLACE_WITH_ISO_DATETIME",
+  "timezone": "REPLACE_WITH_TIMEZONE",
+  "creator": {
+    "name": "REPLACE_WITH_CREATOR_NAME",
+    "role": "Creator",
+    "wallet_address": "0xREPLACE_CREATOR_WALLET",
+    "contact_email": "REPLACE_WITH_EMAIL",
+    "website": "REPLACE_WITH_WEBSITE"
+  },
+  "current_owner": {
+    "name": "REPLACE_WITH_OWNER_NAME",
+    "role": "Owner",
+    "wallet_address": "0xREPLACE_OWNER_WALLET",
+    "ownership_type": "founder",
+    "acquired_at": "REPLACE_WITH_ISO_DATETIME"
+  },
+  "media": {
+  "file_path": "media/asset.mp4",
+  "display_name": "REPLACE_WITH_MEDIA_NAME",
+  "mime_type": "video/mp4",
+  "byte_size": 0,
+  "duration_seconds": 0,
+  "hash_sha256": "REPLACE_WITH_MEDIA_HASH"
+},
+  "license": {
+    "license_file": "license/license.json",
+    "license_id": "LIC-REPLACE",
+    "license_type": "custom",
+    "summary": "REPLACE_WITH_LICENSE_SUMMARY"
+  },
+  "blockchain": {
+    "network_name": "polygon-mainnet",
+    "chain_id": 137,
+    "contract_address": "0xREPLACE_CONTRACT",
+    "token_id": "REPLACE_TOKEN_ID",
+    "token_standard": "ERC-1155",
+    "tx_hash": "0xREPLACE_TX_HASH",
+    "explorer_url": "https://polygonscan.com/tx/0xREPLACE_TX_HASH"
+  },
+  "certificate": {
+    "file_path": "cert/certificate.png",
+    "layout_version": "1.0.0",
+    "title_on_cert": "REPLACE_WITH_CERT_TITLE",
+    "owner_line": "REPLACE_WITH_OWNER_NAME"
+  },
+  "player": {
+    "config_file": "engine/player.json",
+    "min_player_version": "1.0.0",
+    "auto_play": true,
+    "open_dashboard": true,
+    "dashboard_url": "https://theglobaltokenexchange.com/dashboard",
+    "holder_portal_url": "https://theglobaltokenexchange.com/holders"
+  },
+  "credentials": {
+    "file_path": "credentials/owner.json",
+    "engine_id": "ENG-REPLACE",
+    "credential_id": "CRED-REPLACE"
+  },
+  "security": {
+    "signature_file": "signature/signature.json",
+    "media_hash_algorithm": "SHA-256",
+    "metadata_hash": "REPLACE_WITH_METADATA_HASH"
+  }
+}

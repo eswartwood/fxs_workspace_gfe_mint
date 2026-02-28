@@ -1,0 +1,17 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\.fxs]
+@="FXS_SmartFile"
+
+[HKEY_CLASSES_ROOT\FXS_SmartFile]
+@="FXS SmartFile"
+
+[HKEY_CLASSES_ROOT\FXS_SmartFile\DefaultIcon]
+@="C:\\Users\\eswar\\AppData\\Local\\Programs\\FXS SmartFile Viewer\\FXS SmartFile Viewer.exe,0"
+
+[HKEY_CLASSES_ROOT\FXS_SmartFile\shell]
+
+[HKEY_CLASSES_ROOT\FXS_SmartFile\shell\open]
+
+[HKEY_CLASSES_ROOT\FXS_SmartFile\shell\open\command]
+@="\"C:\\Users\\eswar\\AppData\\Local\\Programs\\FXS SmartFile Viewer\\FXS SmartFile Viewer.exe\" \"%1\""
