@@ -7,6 +7,9 @@ import { spawn } from "child_process";
 
 export const runtime = "nodejs";
 
+// ✅ Vercel/Node typings: normalize all Buffers to the same generic type
+type AnyBuffer = Buffer<ArrayBufferLike>;
+
 function safeFileName(name: string) {
   return (name || "GFE_File")
     .replace(/[^\w\- ]+/g, "")
@@ -26,8 +29,9 @@ function u64le(n: number) {
   return b;
 }
 
-function bufferFromArrayBuffer(ab: ArrayBuffer) {
-  return Buffer.from(new Uint8Array(ab));
+function bufferFromArrayBuffer(ab: ArrayBuffer): AnyBuffer {
+  // Buffer.from(Uint8Array) yields Buffer<ArrayBuffer> in TS, but Node fs uses ArrayBufferLike
+  return Buffer.from(new Uint8Array(ab)) as AnyBuffer;
 }
 
 function inferMimeFromName(fileName: string) {
@@ -43,7 +47,7 @@ function inferMimeFromName(fileName: string) {
   return "application/octet-stream";
 }
 
-async function convertMovToMp4(inputMov: Buffer): Promise<Buffer> {
+async function convertMovToMp4(inputMov: AnyBuffer): Promise<AnyBuffer> {
   // Uses system ffmpeg from PATH (most reliable on Windows + Next)
   // Output: H.264 + AAC, faststart
   const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "fxs-"));
@@ -88,7 +92,7 @@ async function convertMovToMp4(inputMov: Buffer): Promise<Buffer> {
     });
   });
 
-  const outBytes = await fs.readFile(outPath);
+  const outBytes = (await fs.readFile(outPath)) as AnyBuffer;
 
   // best-effort cleanup
   try {
@@ -113,7 +117,7 @@ export async function POST(req: Request) {
     const network = String(form.get("network") || "polygon-mainnet").trim();
 
     // ---- Read uploaded bytes
-    let assetBytes = bufferFromArrayBuffer(await file.arrayBuffer());
+    let assetBytes: AnyBuffer = bufferFromArrayBuffer(await file.arrayBuffer());
     const originalName = file.name || "asset.bin";
     const originalType = file.type || inferMimeFromName(originalName);
 
@@ -186,11 +190,11 @@ export async function POST(req: Request) {
     zip.file("metadata/metadata.json", metadataJson);
     zip.file(storedMediaPath, assetBytes);
 
-    const zipBytes: Buffer = await zip.generateAsync({
+    const zipBytes: AnyBuffer = (await zip.generateAsync({
       type: "nodebuffer",
       compression: "DEFLATE",
       compressionOptions: { level: 6 },
-    });
+    })) as AnyBuffer;
 
     // ---- Outer .fxs container
     const MAGIC = Buffer.from("FXS1");
