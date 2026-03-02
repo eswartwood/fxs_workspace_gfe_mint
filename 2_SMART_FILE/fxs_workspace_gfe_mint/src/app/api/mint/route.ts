@@ -1,14 +1,7 @@
 // src/app/api/mint/route.ts
 import JSZip from "jszip";
-import os from "os";
-import path from "path";
-import { promises as fs } from "fs";
-import { spawn } from "child_process";
 
 export const runtime = "nodejs";
-
-// ✅ Vercel/Node typings: normalize all Buffers to the same generic type
-type AnyBuffer = Buffer<ArrayBufferLike>;
 
 function safeFileName(name: string) {
   return (name || "GFE_File")
@@ -29,135 +22,72 @@ function u64le(n: number) {
   return b;
 }
 
-function bufferFromArrayBuffer(ab: ArrayBuffer): AnyBuffer {
-  // Buffer.from(Uint8Array) yields Buffer<ArrayBuffer> in TS, but Node fs uses ArrayBufferLike
-  return Buffer.from(new Uint8Array(ab)) as AnyBuffer;
-}
-
 function inferMimeFromName(fileName: string) {
   const f = (fileName || "").toLowerCase();
   if (f.endsWith(".mp4")) return "video/mp4";
-  if (f.endsWith(".mov")) return "video/mp4"; // after convert
   if (f.endsWith(".webm")) return "video/webm";
+  if (f.endsWith(".mov")) return "video/quicktime";
   if (f.endsWith(".mp3")) return "audio/mpeg";
   if (f.endsWith(".wav")) return "audio/wav";
   if (f.endsWith(".png")) return "image/png";
   if (f.endsWith(".jpg") || f.endsWith(".jpeg")) return "image/jpeg";
   if (f.endsWith(".gif")) return "image/gif";
+  if (f.endsWith(".pdf")) return "application/pdf";
   return "application/octet-stream";
 }
 
-async function convertMovToMp4(inputMov: AnyBuffer): Promise<AnyBuffer> {
-  // Uses system ffmpeg from PATH (most reliable on Windows + Next)
-  // Output: H.264 + AAC, faststart
-  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "fxs-"));
-  const inPath = path.join(tmpDir, "input.mov");
-  const outPath = path.join(tmpDir, "output.mp4");
-
-  await fs.writeFile(inPath, inputMov);
-
-  await new Promise<void>((resolve, reject) => {
-    const p = spawn(
-      "ffmpeg",
-      [
-        "-y",
-        "-i",
-        inPath,
-        "-movflags",
-        "faststart",
-        "-c:v",
-        "libx264",
-        "-pix_fmt",
-        "yuv420p",
-        "-preset",
-        "veryfast",
-        "-crf",
-        "23",
-        "-c:a",
-        "aac",
-        "-b:a",
-        "128k",
-        outPath,
-      ],
-      { stdio: ["ignore", "pipe", "pipe"] }
-    );
-
-    let stderr = "";
-    p.stderr.on("data", (d) => (stderr += d.toString()));
-
-    p.on("error", (e) => reject(e));
-    p.on("close", (code) => {
-      if (code === 0) return resolve();
-      reject(new Error(`ffmpeg failed (code ${code})\n${stderr}`));
-    });
-  });
-
-  const outBytes = (await fs.readFile(outPath)) as AnyBuffer;
-
-  // best-effort cleanup
-  try {
-    await fs.rm(tmpDir, { recursive: true, force: true });
-  } catch {}
-
-  return outBytes;
-}
-
+/**
+ * Option 2: pointer-based SmartFile
+ * - Upload (or convert) media to R2 first
+ * - Then mint a SMALL .fxs containing metadata + R2 pointer
+ *
+ * Viewer must read metadata.media.remote.* and fetch/stream from URL/key.
+ */
 export async function POST(req: Request) {
   try {
-    const form = await req.formData();
+    const body = await req.json();
 
-    const file = form.get("file");
-    if (!(file instanceof File)) {
-      return new Response("Missing file", { status: 400 });
+    const r2Key = String(body.r2Key || "").trim();
+    if (!r2Key) return new Response("Missing r2Key", { status: 400 });
+
+    const title = String(body.title || "").trim() || r2Key.split("/").pop() || "GFE_File";
+    const creatorName = String(body.creator || "Global Data Capture, LLC").trim();
+    const ownerName = String(body.owner || "REPLACE_WITH_OWNER_NAME").trim();
+    const network = String(body.network || "polygon-mainnet").trim();
+
+    const originalName = String(body.originalName || r2Key.split("/").pop() || "asset.bin").trim();
+    const mimeType = String(body.mimeType || inferMimeFromName(originalName)).trim();
+
+    const bytes =
+      typeof body.bytes === "number" && Number.isFinite(body.bytes) ? Math.max(0, body.bytes) : 0;
+
+    // REQUIRED for Option 2 “public fetch”
+    // Set this to your R2 custom domain or public dev URL base, WITHOUT trailing slash.
+    const publicBaseUrl = String(process.env.R2_PUBLIC_BASE_URL || "").replace(/\/+$/, "");
+    if (!publicBaseUrl) {
+      return new Response("Missing env R2_PUBLIC_BASE_URL", { status: 500 });
     }
 
-    const title = String(form.get("title") || "").trim() || file.name;
-    const creatorName = String(form.get("creator") || "Global Data Capture").trim();
-    const ownerName = String(form.get("owner") || "REPLACE_WITH_OWNER_NAME").trim();
-    const network = String(form.get("network") || "polygon-mainnet").trim();
+    // Optional: which bucket this key belongs to (for internal/debug)
+    const bucket = String(process.env.R2_BUCKET || "").trim();
 
-    // ---- Read uploaded bytes
-    let assetBytes: AnyBuffer = bufferFromArrayBuffer(await file.arrayBuffer());
-    const originalName = file.name || "asset.bin";
-    const originalType = file.type || inferMimeFromName(originalName);
+    const issuedAt = new Date().toISOString();
 
-    // ---- Convert MOV → MP4 if needed
-    const looksLikeMov =
-      originalType === "video/quicktime" || originalName.toLowerCase().endsWith(".mov");
-
-    let mediaFileName = originalName;
-    let mediaMime = originalType;
-
-    if (looksLikeMov) {
-      // This requires ffmpeg installed and available as "ffmpeg"
-      assetBytes = await convertMovToMp4(assetBytes);
-      mediaFileName = "asset.mp4";
-      mediaMime = "video/mp4";
-    } else {
-      // normalize name for the viewer default
-      // if it's already mp4, we still store as asset.mp4 so viewer doesn't miss it
-      const lower = originalName.toLowerCase();
-      if (lower.endsWith(".mp4")) {
-        mediaFileName = "asset.mp4";
-        mediaMime = "video/mp4";
-      } else {
-        // keep as generic asset.bin (viewer will still mount it if metadata points to it)
-        mediaFileName = "asset.bin";
-        mediaMime = originalType || inferMimeFromName(mediaFileName);
-      }
-    }
-
-    // ---- Viewer expects these files
+    // --- Header (small)
     const header = {
       title,
       creator_name: creatorName,
       owner_name: ownerName,
       network,
-      issued_at: new Date().toISOString(),
+      issued_at: issuedAt,
       token_id: "",
       credential_id: "",
       version: "fxs-zip-v1",
+      mode: "remote-r2-v1",
     };
+
+    // --- Metadata (the important part)
+    const assetUrl = `${publicBaseUrl}/${encodeURI(r2Key)}`;
 
     const metadata = {
       title,
@@ -165,52 +95,54 @@ export async function POST(req: Request) {
       current_owner: { name: ownerName, wallet_address: "" },
       blockchain: { network_name: network, token_id: "" },
       stats: { opens: 0, views: 0 },
-      minted_at: header.issued_at,
+      minted_at: issuedAt,
       credential_id: "",
       media: {
-        file_path: "media/asset.mp4", // keep viewer default path stable
-        mime_type: mediaMime,
-        bytes: assetBytes.length,
+        // keep a stable “logical” path, but signal remote mode
+        file_path: "media/asset",
+        mime_type: mimeType,
+        bytes,
         original_filename: originalName,
+
+        remote: {
+          provider: "cloudflare-r2",
+          bucket,
+          key: r2Key,
+          url: assetUrl,
+
+          // Optional future flags for the viewer:
+          // stream: true, // if viewer supports streaming
+          // range: true,  // if you set headers/worker to support range requests
+        },
       },
       version: "fxs-zip-v1",
     };
 
-    // If we didn't end up with mp4, point metadata to the real stored path
-    const storedMediaPath =
-      mediaFileName === "asset.mp4" ? "media/asset.mp4" : `media/${mediaFileName}`;
-    metadata.media.file_path = storedMediaPath;
-
     const headerJson = Buffer.from(JSON.stringify(header, null, 2), "utf8");
     const metadataJson = Buffer.from(JSON.stringify(metadata, null, 2), "utf8");
 
-    // ---- ZIP payload (what Electron extracts)
+    // --- ZIP payload: ONLY metadata (no big media bytes)
     const zip = new JSZip();
     zip.file("metadata/header.json", headerJson);
     zip.file("metadata/metadata.json", metadataJson);
-    zip.file(storedMediaPath, assetBytes);
 
-    const zipBytes: AnyBuffer = (await zip.generateAsync({
+    // (Optional placeholder so viewer has something to mount locally)
+    zip.file("media/README_REMOTE.txt", "Remote media pointer. Viewer should fetch media.remote.url\n");
+
+    const zipBytes = (await zip.generateAsync({
       type: "nodebuffer",
       compression: "DEFLATE",
       compressionOptions: { level: 6 },
-    })) as AnyBuffer;
+    })) as Buffer;
 
-    // ---- Outer .fxs container
+    // --- Outer .fxs container (same envelope, tiny payload)
     const MAGIC = Buffer.from("FXS1");
     const VERSION = u32le(1);
 
     const metaLen = u32le(metadataJson.length);
     const zipLen = u64le(zipBytes.length);
 
-    const fxsBytes = Buffer.concat([
-      MAGIC,
-      VERSION,
-      metaLen,
-      metadataJson,
-      zipLen,
-      zipBytes,
-    ]);
+    const fxsBytes = Buffer.concat([MAGIC, VERSION, metaLen, metadataJson, zipLen, zipBytes]);
 
     const outName = `${safeFileName(title)}.fxs`;
 
