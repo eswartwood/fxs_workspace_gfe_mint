@@ -20,14 +20,8 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const fileName = String(body.fileName || "asset.bin").trim();
-    const contentType = String(body.contentType || "application/octet-stream").trim();
-
-    const bytesRaw = body.bytes;
-    const bytes =
-      typeof bytesRaw === "number" && Number.isFinite(bytesRaw)
-        ? Math.max(0, Math.floor(bytesRaw))
-        : 0;
+    const fileName = String(body.fileName || "asset.bin");
+    const contentType = String(body.contentType || "application/octet-stream");
 
     const bucket = process.env.R2_BUCKET;
     const accountId = process.env.R2_ACCOUNT_ID;
@@ -35,24 +29,20 @@ export async function POST(req: Request) {
     const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
 
     if (!bucket || !accountId || !accessKeyId || !secretAccessKey) {
-      return new Response(
-        "Missing R2 env vars (need R2_BUCKET, R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY)",
-        { status: 500 }
-      );
+      return new Response("Missing R2 env vars", { status: 500 });
     }
 
-    // Key layout: uploads/YYYY/MM/DD/<timestamp>_<safeName>.ext
-    // (Bucket can still be named gfe-assets — we keep the *key* clean.)
+    // Key layout: gfe-assets/YYYY/MM/DD/<timestamp>_<safeName>.ext
     const now = new Date();
     const yyyy = String(now.getUTCFullYear());
     const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
     const dd = String(now.getUTCDate()).padStart(2, "0");
 
-    const base = safeKeyPart(fileName.replace(extFromName(fileName), "")) || "asset";
+    const base = safeKeyPart(fileName.replace(extFromName(fileName), ""));
     const ext = extFromName(fileName) || ".bin";
     const stamp = `${Date.now()}`;
 
-    const r2Key = `uploads/${yyyy}/${mm}/${dd}/${stamp}_${base}${ext}`;
+    const r2Key = `gfe-assets/${yyyy}/${mm}/${dd}/${stamp}_${base}${ext}`;
 
     const s3 = new S3Client({
       region: "auto",
@@ -60,12 +50,11 @@ export async function POST(req: Request) {
       credentials: { accessKeyId, secretAccessKey },
     });
 
+    // IMPORTANT: do NOT sign ContentLength (avoids browser mismatch headaches)
     const cmd = new PutObjectCommand({
       Bucket: bucket,
       Key: r2Key,
       ContentType: contentType,
-      // Optional: include when known
-      ContentLength: bytes || undefined,
     });
 
     const uploadUrl = await getSignedUrl(s3, cmd, { expiresIn: 60 * 5 }); // 5 minutes
