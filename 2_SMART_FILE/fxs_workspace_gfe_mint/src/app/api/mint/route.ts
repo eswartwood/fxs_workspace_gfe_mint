@@ -38,10 +38,10 @@ function inferMimeFromName(fileName: string) {
 
 /**
  * Option 2: pointer-based SmartFile
- * - Upload (or convert) media to R2 first
+ * - Upload media to R2 first (browser PUT)
  * - Then mint a SMALL .fxs containing metadata + R2 pointer
  *
- * Viewer must read metadata.media.remote.* and fetch/stream from URL/key.
+ * Viewer must read metadata.media.remote.* and fetch from URL/key.
  */
 export async function POST(req: Request) {
   try {
@@ -50,19 +50,27 @@ export async function POST(req: Request) {
     const r2Key = String(body.r2Key || "").trim();
     if (!r2Key) return new Response("Missing r2Key", { status: 400 });
 
-    const title = String(body.title || "").trim() || r2Key.split("/").pop() || "GFE_File";
+    const title =
+      String(body.title || "").trim() ||
+      r2Key.split("/").pop() ||
+      "GFE_File";
+
     const creatorName = String(body.creator || "Global Data Capture, LLC").trim();
     const ownerName = String(body.owner || "REPLACE_WITH_OWNER_NAME").trim();
     const network = String(body.network || "polygon-mainnet").trim();
 
-    const originalName = String(body.originalName || r2Key.split("/").pop() || "asset.bin").trim();
+    const originalName =
+      String(body.originalName || r2Key.split("/").pop() || "asset.bin").trim();
+
     const mimeType = String(body.mimeType || inferMimeFromName(originalName)).trim();
 
     const bytes =
-      typeof body.bytes === "number" && Number.isFinite(body.bytes) ? Math.max(0, body.bytes) : 0;
+      typeof body.bytes === "number" && Number.isFinite(body.bytes)
+        ? Math.max(0, body.bytes)
+        : 0;
 
     // REQUIRED for Option 2 “public fetch”
-    // Set this to your R2 custom domain or public dev URL base, WITHOUT trailing slash.
+    // Set this to your R2 custom domain or public base URL, WITHOUT trailing slash.
     const publicBaseUrl = String(process.env.R2_PUBLIC_BASE_URL || "").replace(/\/+$/, "");
     if (!publicBaseUrl) {
       return new Response("Missing env R2_PUBLIC_BASE_URL", { status: 500 });
@@ -72,6 +80,9 @@ export async function POST(req: Request) {
     const bucket = String(process.env.R2_BUCKET || "").trim();
 
     const issuedAt = new Date().toISOString();
+
+    // --- Build asset URL
+    const assetUrl = `${publicBaseUrl}/${encodeURI(r2Key)}`;
 
     // --- Header (small)
     const header = {
@@ -84,19 +95,27 @@ export async function POST(req: Request) {
       credential_id: "",
       version: "fxs-zip-v1",
       mode: "remote-r2-v1",
+
+      // ✅ ADD so tools/viewer can find it easily
+      r2Key,
+      assetUrl,
     };
 
     // --- Metadata (the important part)
-    const assetUrl = `${publicBaseUrl}/${encodeURI(r2Key)}`;
-
     const metadata = {
       title,
+
+      // ✅ ADD top-level pointer fields (your console helper likely expects this)
+      r2Key,
+      assetUrl,
+
       creator: { name: creatorName },
       current_owner: { name: ownerName, wallet_address: "" },
       blockchain: { network_name: network, token_id: "" },
       stats: { opens: 0, views: 0 },
       minted_at: issuedAt,
       credential_id: "",
+
       media: {
         // keep a stable “logical” path, but signal remote mode
         file_path: "media/asset",
@@ -107,14 +126,17 @@ export async function POST(req: Request) {
         remote: {
           provider: "cloudflare-r2",
           bucket,
-          key: r2Key,
-          url: assetUrl,
 
-          // Optional future flags for the viewer:
-          // stream: true, // if viewer supports streaming
-          // range: true,  // if you set headers/worker to support range requests
+          // ✅ keep original field
+          key: r2Key,
+
+          // ✅ duplicate field name that many scripts expect
+          r2Key,
+
+          url: assetUrl,
         },
       },
+
       version: "fxs-zip-v1",
     };
 
@@ -126,8 +148,11 @@ export async function POST(req: Request) {
     zip.file("metadata/header.json", headerJson);
     zip.file("metadata/metadata.json", metadataJson);
 
-    // (Optional placeholder so viewer has something to mount locally)
-    zip.file("media/README_REMOTE.txt", "Remote media pointer. Viewer should fetch media.remote.url\n");
+    // placeholder so viewer has something locally
+    zip.file(
+      "media/README_REMOTE.txt",
+      "Remote media pointer. Viewer should fetch metadata.media.remote.url\n"
+    );
 
     const zipBytes = (await zip.generateAsync({
       type: "nodebuffer",
@@ -135,7 +160,7 @@ export async function POST(req: Request) {
       compressionOptions: { level: 6 },
     })) as Buffer;
 
-    // --- Outer .fxs container (same envelope, tiny payload)
+    // --- Outer .fxs container (tiny payload)
     const MAGIC = Buffer.from("FXS1");
     const VERSION = u32le(1);
 
@@ -158,3 +183,4 @@ export async function POST(req: Request) {
     return new Response(`Mint error: ${e?.message || String(e)}`, { status: 500 });
   }
 }
+
