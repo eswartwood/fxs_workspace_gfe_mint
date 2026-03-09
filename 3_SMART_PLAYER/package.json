@@ -5,11 +5,12 @@
   "description": "FXS SmartFile Viewer by Global Data Capture",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
-    "dev": "electron .",
-    "pack": "electron-builder --dir",
-    "dist": "electron-builder"
-  },
+  "start": "electron .",
+  "dev": "electron .",
+  "pack": "electron-builder --dir",
+  "dist": "electron-builder",
+  "ship": "git add . && git commit -m \"trigger build\" && git push origin fxs-dev"
+},
   "dependencies": {
     "electron-window-state": "^5.0.3",
     "jszip": "^3.10.1",
@@ -21,11 +22,22 @@
     "png-to-ico": "^3.0.1"
   },
   "build": {
-    "appId": "com.globaldatacapture.fxsviewer",
-    "productName": "FXS SmartFile Viewer",
-    "files": [
-      "**/*"
-    ],
+  "appId": "com.globaldatacapture.fxsviewer",
+  "productName": "FXS SmartFile Viewer",
+
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      }
+    ]
+  },
+
+  "files": [
+    "**/*"
+  ],
+
     "asar": true,
     "fileAssociations": [
       {
